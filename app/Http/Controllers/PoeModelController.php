@@ -5,29 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class PoeModelController extends Controller
 {
     public function index()
     {
-        $response = Http::withToken(config('services.poe.key'))
-            ->acceptJson()
-            ->get(config('services.poe.url'));
+        $models = Cache::remember('poe_models', now()->addHours(12), function () {
+            $response = Http::withToken(config('services.poe.key'))
+                ->acceptJson()
+                ->get(config('services.poe.base_url') . '/v1/models');
 
-        // Initialize with empty collection by default
-        $sortedModels = collect([]);
+            if ($response->successful()) {
+                return $response->json('data', []);
+            }
 
-        if ($response->failed()) {
-            return view('poe-models', [
-                'error' => 'Failed to fetch models from Poe API. Check your API key.',
-                'sortedModels' => $sortedModels // Pass the empty variable to prevent crash
-            ]);
-        }
+            return [];
+        });
 
-        $models = $response->json()['data'] ?? [];
-
-        $sortedModels = collect($models)->sortByDesc('created')->values();
-
-        return view('poe-models', compact('sortedModels'));
+        return view('poe-models', ['models' => $models]);
     }
 }

@@ -20,8 +20,8 @@ return [
 
     // config/services.php
     'poe' => [
+        'base_url' => env('POE_API_BASE_URL', 'https://api.poe.com'),
         'key' => env('POE_API_KEY'),
-        'url' => 'https://api.poe.com/v1/models',
     ],
 
     'resend' => [
