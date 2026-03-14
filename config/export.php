@@ -67,7 +67,9 @@ return [
      */
     'after' => [
         // 'deploy' => '/usr/local/bin/netlify deploy --prod',
+        'nojekyll' => 'touch dist/.nojekyll',
     ],
+
 
     'urls' => [
         '/',

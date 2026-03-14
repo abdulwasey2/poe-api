@@ -10,18 +10,22 @@ class PoeModelController extends Controller
 {
     public function index()
     {
-        // 1. Fetch data from the API
         $response = Http::withToken(config('services.poe.key'))
             ->acceptJson()
             ->get(config('services.poe.url'));
 
+        // Initialize with empty collection by default
+        $sortedModels = collect([]);
+
         if ($response->failed()) {
-            return view('poe-models', ['error' => 'Failed to fetch models from Poe API.']);
+            return view('poe-models', [
+                'error' => 'Failed to fetch models from Poe API. Check your API key.',
+                'sortedModels' => $sortedModels // Pass the empty variable to prevent crash
+            ]);
         }
 
         $models = $response->json()['data'] ?? [];
 
-        // 2. Process and Sort by 'created' (Newest first)
         $sortedModels = collect($models)->sortByDesc('created')->values();
 
         return view('poe-models', compact('sortedModels'));
